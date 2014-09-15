@@ -12,5 +12,7 @@ http://www.ndw.nu/
 The data FTP address is listed below:
 ftp://83.247.110.3/
 
-Version 0.2 of this java application focuses on traffic speed data:
-* trafficspeed.gz : files which are compressed around 2Mb, uncompressed >50Mb containing traffic speed and traffic flow data combined in one XML file for >17k measurement points in the Dutch roads.
+Version 0.2 of this java application focuses on:
+  traffic speed data using the trafficspeed.gz files which are compressed around 2Mb, uncompressed >50Mb containing traffic speed and traffic flow data combined in one XML file for >17k measurement points in the Dutch roads.
+  reading measurements from the large XML files using SAX (DOM failed due to filesize)
+  creating java objects with each measurement to be pushed to a database
