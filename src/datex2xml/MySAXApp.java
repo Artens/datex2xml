@@ -2,6 +2,7 @@ package datex2xml;
 
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -34,6 +35,8 @@ public class MySAXApp extends DefaultHandler
     	xr.setErrorHandler(handler);
     	FileReader r = new FileReader(fileName);
     	xr.parse(new InputSource(r));
+
+    	
     	
     }
     ////////////////////////////////////////////////////////////////////
