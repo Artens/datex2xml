@@ -25,7 +25,11 @@ public class Main {
 	        **/	
 	        	// else run the local file
 	        	final String fileName = "/home/jef/trafficspeed";
-		        MySAXApp.readXML(fileName);
+		        
+	        	
+	        	MySAXApp.readXML(fileName);
+		        
+		        
 	      /**  
 	    	}
 	        **/
