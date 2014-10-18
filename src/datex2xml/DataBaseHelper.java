@@ -140,7 +140,7 @@ class DBase
             	query = query 	+ "VALUES " 
             					+ "(NULL,'"
             					+ measurement.getPublicationTime() + "','" 
-            					+ measurement.getMeasuredValue() + "','"
+            					+ measurement.getMeasurementSiteReference() + "','"
             					+ measurement.getMeasurementTimeDefault() + "','"
             					+ measurement.getSiteMeasurementsIndexMeasuredValue() + "','"
             					+ measurement.getBasicData() + "','"
