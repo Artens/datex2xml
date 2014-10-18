@@ -1,13 +1,16 @@
 package datex2xml;
 
 import java.sql.*;
+import com.mysql.jdbc.Driver;
 
 /**
  * @author J.K.J. Martens
  * 
- * In this file some specific information is redacted, 
- * as one wouldn't want to publicize ones database credentials...
- *
+ *	In this file some specific information is redacted, 
+ *	as one wouldn't want to publicize ones database credentials...
+ *	
+ *	The test variable in this class allows you to test your queries
+ *	by outputting the full query to the console
  */
 
 public class DataBaseHelper {
@@ -19,10 +22,6 @@ public class DataBaseHelper {
 	private String user 		;
 	private String password 	;
 	private boolean test		= true;
-	private String[][] testArray = {
-									{"product1", "23"},
-									{"product2", "42"}
-									}; 
 	
 	public void setTest(boolean testValue){
 		this.test = testValue;
@@ -32,7 +31,7 @@ public class DataBaseHelper {
 		this.table = table;
 	}
 	
-	private void loadDatabase(){
+	public void loadDatabase(Measurement measurement){
 		DBase dataBase = new DBase();
 		Connection connection = dataBase.connect(	this.connector + 
 													this.host + ":"	+ 
@@ -41,13 +40,12 @@ public class DataBaseHelper {
 													user, 
 													password
 													);
-		// confirm that this is no test
-		if(true == this.test){
-		dataBase.importData(connection, this.table, testArray);
-		} else{
-			String[] args;
-			dataBase.importData(connection, this.table, testArray);
-		}
+		// Load the content (test is used for output query)
+		dataBase.importMeasurement(	connection, 
+									this.table, 
+									measurement, 
+									test
+									);
 	}
 	
 }
@@ -112,5 +110,61 @@ class DBase
             e.printStackTrace();
             stmt = null;
         }
+    }
+    
+    public void importMeasurement(Connection conn, String table, Measurement measurement, boolean test){
+            Statement stmt;
+            String query;
+
+            try
+            {
+                stmt = conn.createStatement(
+                			ResultSet.TYPE_SCROLL_INSENSITIVE,
+                			ResultSet.CONCUR_UPDATABLE);
+
+                query = "INSERT INTO `"+ table + "` ("
+                		+ "`record_ID` , "
+                		+ "`publicationTime`, "
+                		+ "`measurementSiteReference` , "
+                		+ "`measurementTimeDefault` , "
+                		+ "`_SiteMeasurementsIndexMeasuredValue` , "
+                		+ "`basicData` , "
+                		+ "`vehicleFlowRate` , "
+                		+ "`numberOfIncompleteInputs` , "
+                		+ "`numberOfInputValuesUsed` , "
+                		+ "`speed` , "
+                		+ "`standardDeviation`"
+                		+ ") ";
+                           
+                // for each measurement, create an entry
+            	query = query 	+ "VALUES " 
+            					+ "(NULL,'"
+            					+ measurement.getPublicationTime() + "','" 
+            					+ measurement.getMeasuredValue() + "','"
+            					+ measurement.getMeasurementTimeDefault() + "','"
+            					+ measurement.getSiteMeasurementsIndexMeasuredValue() + "','"
+            					+ measurement.getBasicData() + "','"
+            					+ measurement.getVehicleFlowRate() + "','"
+            					+ measurement.getNumberOfIncompleteInputs() + "','"
+            					+ measurement.getNumberOfInputValuesUsed() + "','"
+            					+ measurement.getSpeed() + "','"
+            					+ measurement.getStandardDeviation() + "'"
+            					+ ")";
+            	// mark the end of the insertion
+                query = query + ";"; 
+                
+                // check for test, if true, output the query
+                if(true == test){
+                	System.out.print(query);
+                } else { // else, go ahead with loading the query
+                stmt.executeUpdate(query);
+                }
+                    
+            }
+            catch(Exception e)
+            {
+                e.printStackTrace();
+                stmt = null;
+            }
     }
 }
