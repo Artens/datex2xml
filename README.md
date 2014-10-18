@@ -18,6 +18,7 @@ This java application focuses on:
 *  creating java objects with each measurement to be pushed to a MySQL database
 
 Changelog
+
 V0.31
 - Fixed measurement entry in DataBaseHelper class
 
