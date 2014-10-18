@@ -2,8 +2,6 @@ package datex2xml;
 
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
@@ -11,6 +9,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.helpers.XMLReaderFactory;
 import org.xml.sax.helpers.DefaultHandler;
 
+import datex2xml.DataBaseHelper;
 
 public class MySAXApp extends DefaultHandler
 {
@@ -20,7 +19,8 @@ public class MySAXApp extends DefaultHandler
 	String 		elementValue;				// help variable to set the Value of an Element tag i.e. <element id="30">
 	String 		elementContent;				// help variable to set the Content between Element tags <el>Content</el>
 	int 		parserCounter 	= 0;		// help variable to count the number of elements parsed
-		
+	Measurement measurement = new Measurement(); 	// measurement for multiple entries (per site the measurement object is reused)
+	
     public static void main (String args[])
 	throws Exception
     {
@@ -48,45 +48,77 @@ public class MySAXApp extends DefaultHandler
     {
 	System.out.println("Start document");
     }
-
+    
+    // Parsing of tags
     public void startElement (String uri, String name,
 			      String qName, Attributes atts)
     {
+    	if(name == "publicationTime"){
+    		this.elementName = name;
+    		parseHelper = true;
+    	}
+    	
     	if(name == "measurementSiteReference")	{
-    		processElement(name, atts, true, "id");
+    		measurement.setMeasurementSiteReference(processStringElement(name, atts, true, "id"));
 	    } 
-    	else if(name == "measuredValue"){
+    	
+    	if(name == "measurementTimeDefault")	{
+    		this.elementName = name;
+    		parseHelper = true;
+    	} 
+    	
+    	if(name == "measuredValue"){
     		if (getValue("index", atts)){
-    			parseHelper = true;
-    	    	elementName = name.toString();
-    	    	System.out.print(atts.getValue("xsi:type") + ": " + atts.getValue("index"));
-    	    	System.out.print("\n"); // add the newline
+    	    	measurement.setSiteMeasurementsIndexMeasuredValue(Integer.parseInt(atts.getValue("index")));
+    	    	measurement.setMeasuredValue("MeasuredValue");
     		}
 	    }
     	
-    	else if(name == "basicData"){
-    		processElement(name, atts, true, "xsi:type");
+    	if(name == "basicData"){
+    		measurement.setBasicData(processStringElement(name, atts, true, "xsi:type"));
 		}
     	
-    	else if(name == "vehicleFlowRate"){
-			processElement(name, atts, false, null);
+    	if(name == "vehicleFlow"){
+    		if(getValue("numberOfIncompleteInputs", atts)){
+    		measurement.setNumberOfIncompleteInputs(processIntElement(name, atts, true, "numberOfIncompleteInputs"));
+			}
+			if(getValue("numberOfInputValuesUsed", atts)){
+			measurement.setNumberOfInputValuesUsed(processIntElement(name, atts, true, "numberOfInputValuesUsed"));
+			}
+			if(getValue("standardDeviation", atts)){
+			measurement.setStandardDeviation(processIntElement(name, atts, true, "standardDeviation"));
+			}
 	    }
     	
-    	else if(name == "speed"){
-			processElement(name, atts, false, null);
+    	if(name == "averageVehicleSpeed"){
+			if(getValue("numberOfIncompleteInputs", atts)){
+    		measurement.setNumberOfIncompleteInputs(processIntElement(name, atts, true, "numberOfIncompleteInputs"));
+			}
+			if(getValue("numberOfInputValuesUsed", atts)){
+			measurement.setNumberOfInputValuesUsed(processIntElement(name, atts, true, "numberOfInputValuesUsed"));
+			}
+			if(getValue("standardDeviation", atts)){
+			measurement.setStandardDeviation(Float.parseFloat(processStringElement(name, atts, true, "standardDeviation")));
+			}
 	    }
     	
-    	else if(name == "measurementOrCalculationTime")	{
-    		processElement(name, atts, false, null);
+    	if(name == "vehicleFlowRate"){
+    		this.elementName = name;
+    		parseHelper = true;
 	    }
     	
+    	if(name == "speed"){
+    		this.elementName = name;
+    		parseHelper = true;
+    	}
+	    
 	    
     }
 
    public void characters (char ch[], int start, int length)
    {
+	   if(true == parseHelper){
 	   // when parseHelper is true, content is important to output
-	   if(parseHelper){
 		   parserCounter++; // update the counter
 		   elementContent = ""; // set the initial Content value to an empty string
 		//System.out.print("Characters:    \"");
@@ -113,10 +145,23 @@ public class MySAXApp extends DefaultHandler
 				break;
 		    	}
 		    }
-		// print a new line after the content is shared
-		System.out.print(elementContent); // the added up content of the character string is printed
-	    System.out.print("\n");
-		}
+	    }
+	   
+    	if(this.elementName == "publicationTime"){
+    		measurement.setPublicationTime(elementContent);
+    	}
+
+    	if(this.elementName == "measurementTimeDefault"){
+    		measurement.setMeasurementTimeDefault(elementContent);
+    	}
+    	
+    	if(this.elementName == "vehicleFlowRate"){
+    		measurement.setVehicleFlowRate(Integer.parseInt(elementContent));
+	    }
+    	
+    	if(this.elementName == "speed"){
+    		measurement.setSpeed(Float.parseFloat(elementContent));
+	    }
    }
 
    public void endElement (String uri, String name, String qName)
@@ -127,8 +172,15 @@ public class MySAXApp extends DefaultHandler
    	elementValue 	= null;
    	elementContent 	= null;
    	
+   	
+   	// When we reach the end of the measurement, push the measurement to the database
+   	if(name == "basicData"){
+   		DataBaseHelper myDBH = new DataBaseHelper();
+   		myDBH.loadDatabase(measurement);
+   	}
+   	// When we reach the end of the siteMeasurements, post a result
    	if(name == "siteMeasurements"){
-   		System.out.println("**** END OF SITEMEASUREMENTS ****\n");
+   		measurement.reset(); // reset the measurement
    	}
    }
 
@@ -148,7 +200,7 @@ public class MySAXApp extends DefaultHandler
 	return true;
    }
    
-   public void processElement(String name, Attributes atts, boolean check, String value){
+   public void printElement(String name, Attributes atts, boolean check, String value){
 	   	parseHelper = true;
    		elementName = name.toString();
    		if (check){
@@ -156,6 +208,23 @@ public class MySAXApp extends DefaultHandler
    		} else {
 		System.out.print(elementName + ": ");
    		}
-   }
+   	}
    
+   public String processStringElement(String name, Attributes atts, boolean check, String value){
+	   	parseHelper = true;
+  		if (check){
+  		return atts.getValue(value);
+  		} else {
+		return null;
+  		}
+  	}
+   
+   public int processIntElement(String name, Attributes atts, boolean check, String value){
+	   	parseHelper = true;
+ 		if (check){
+ 		return Integer.parseInt(atts.getValue(value));
+ 		} else {
+		return 0;
+ 		}
+ 	}
 }

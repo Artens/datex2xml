@@ -2,21 +2,27 @@ package datex2xml;
 
 public class Measurement {
 	// all attributes of a single measurementSite
+	String	publicationTime;
 	String 	measurementSiteReference;
 	String 	measurementTimeDefault;
-	
 	int 	siteMeasurementsIndexMeasuredValue;
 	String 	measuredValue;
+	String	basicData;
 	String	trafficFlow;
 	int		vehicleFlowRate;
 	String	trafficSpeed;
 	int		numberOfIncompleteInputs;
 	int		numberOfInputValuesUsed;
-	int		standardDeviation;
-	int		speed;
+	float	standardDeviation;
+	float	speed;
 
 	//create getters
-	
+	public String getPublicationTime() {
+		return publicationTime;
+	}
+	public String getBasicData() {
+		return basicData;
+	}
 	public String getMeasurementSiteReference() {
 		return measurementSiteReference;
 	}
@@ -44,27 +50,31 @@ public class Measurement {
 	public int getNumberOfInputValuesUsed() {
 		return numberOfInputValuesUsed;
 	}
-	public int getStandardDeviation() {
+	public float getStandardDeviation() {
 		return standardDeviation;
 	}
-	public int getSpeed() {
+	public float getSpeed() {
 		return speed;
 	}
 	
 	//create setters
-	
+	public void setPublicationTime(String publicationTime) {
+		this.publicationTime = publicationTime;
+	}
 	public void setMeasurementSiteReference(String measurementSiteReference) {
 		this.measurementSiteReference = measurementSiteReference;
 	}
 	public void setMeasurementTimeDefault(String measurementTimeDefault) {
 		this.measurementTimeDefault = measurementTimeDefault;
 	}
-	public void setSiteMeasurementsIndexMeasuredValue(
-			int siteMeasurementsIndexMeasuredValue) {
+	public void setSiteMeasurementsIndexMeasuredValue(int siteMeasurementsIndexMeasuredValue) {
 		this.siteMeasurementsIndexMeasuredValue = siteMeasurementsIndexMeasuredValue;
 	}
 	public void setMeasuredValue(String measuredValue) {
 		this.measuredValue = measuredValue;
+	}
+	public void setBasicData(String basicData) {
+		this.basicData = basicData;
 	}
 	public void setTrafficFlow(String trafficFlow) {
 		this.trafficFlow = trafficFlow;
@@ -81,11 +91,29 @@ public class Measurement {
 	public void setNumberOfInputValuesUsed(int numberOfInputValuesUsed) {
 		this.numberOfInputValuesUsed = numberOfInputValuesUsed;
 	}
-	public void setStandardDeviation(int standardDeviation) {
+	public void setStandardDeviation(float standardDeviation) {
 		this.standardDeviation = standardDeviation;
 	}
-	public void setSpeed(int speed) {
+	public void setSpeed(float speed) {
 		this.speed = speed;
+	}
+	
+	public void reset(){
+	// RESET all values for the measurement
+		this.publicationTime = "";
+		this.measurementSiteReference = "";
+		this.measurementTimeDefault = "";
+		this.siteMeasurementsIndexMeasuredValue = 0;
+		this.measuredValue = "";
+		this.basicData = "";
+		this.trafficFlow = "";
+		this.vehicleFlowRate = 0;
+		this.trafficSpeed = "";
+		this.numberOfIncompleteInputs = 0;
+		this.numberOfInputValuesUsed = 0;
+		this.standardDeviation = 0;
+		this.speed = 0;
+		System.out.println("measurement was reset");
 	}
 // end of Measurement
 }

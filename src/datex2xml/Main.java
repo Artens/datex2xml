@@ -1,11 +1,6 @@
 package datex2xml;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.zip.GZIPInputStream;
-
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import datex2xml.MySAXApp;
@@ -22,17 +17,20 @@ public class Main {
 	        	InputStream input = new GZIPInputStream(new FileInputStream(fileFTP));
 	        	MySAXApp.readXML(null, input);
 	        } else {
-	        **/	
-	        	// else run the local file
-	        	final String fileName = "/home/jef/trafficspeed";
-		        
-	        	
-	        	MySAXApp.readXML(fileName);
-		        
-		        
-	      /**  
-	    	}
 	        **/
+	        	
+	        
+	        // run the local file if no arguments are given	
+	        final String fileName = "D:/trafficspeedFull";
+	        	if(null == args[0]){
+	        		MySAXApp.readXML(fileName);
+	        	} else {
+	        		MySAXApp.readXML(args[0]);
+	        	}
+		        
+	       /**
+	    	}
+	       **/
 	        
 	    }
 	   
