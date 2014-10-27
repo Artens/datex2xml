@@ -11,7 +11,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import datex2xml.DataBaseHelper;
 
-public class MySAXApp extends DefaultHandler
+public class Trafficspeed extends DefaultHandler
 {
 
 	boolean 	parseHelper 	= false;	// boolean to indicate whether an element should be processed
@@ -30,7 +30,7 @@ public class MySAXApp extends DefaultHandler
 
     public static void readXML(String fileName) throws SAXException, IOException    {
     	XMLReader xr = XMLReaderFactory.createXMLReader();
-    	MySAXApp handler = new MySAXApp();
+    	Trafficspeed handler = new Trafficspeed();
     	xr.setContentHandler(handler);
     	xr.setErrorHandler(handler);
     	FileReader r = new FileReader(fileName);
