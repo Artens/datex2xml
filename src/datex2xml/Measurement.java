@@ -113,7 +113,7 @@ public class Measurement {
 		this.numberOfInputValuesUsed = 0;
 		this.standardDeviation = 0;
 		this.speed = 0;
-		System.out.println("measurement was reset");
+		// System.out.println("measurement was reset"); // printout for resetting measurement data
 	}
 // end of Measurement
 }

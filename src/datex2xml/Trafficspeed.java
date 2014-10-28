@@ -2,6 +2,8 @@ package datex2xml;
 
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Date;
+
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
@@ -14,12 +16,16 @@ import datex2xml.DataBaseHelper;
 public class Trafficspeed extends DefaultHandler
 {
 
-	boolean 	parseHelper 	= false;	// boolean to indicate whether an element should be processed
-	String 		elementName;				// help variable to set the Name of an Element <elementName></elementName>
-	String 		elementValue;				// help variable to set the Value of an Element tag i.e. <element id="30">
-	String 		elementContent;				// help variable to set the Content between Element tags <el>Content</el>
-	int 		parserCounter 	= 0;		// help variable to count the number of elements parsed
-	Measurement measurement = new Measurement(); 	// measurement for multiple entries (per site the measurement object is reused)
+	boolean 	parseHelper 			= false;		// boolean to indicate whether an element should be processed
+	String 		elementName;							// help variable to set the Name of an Element <elementName></elementName>
+	String 		elementValue;							// help variable to set the Value of an Element tag i.e. <element id="30">
+	String 		elementContent;							// help variable to set the Content between Element tags <el>Content</el>
+	int 		parserCounter 			= 0;			// help variable to count the number of elements parsed
+	String		publicationTime 		= "";			// help variable to set publication Time
+	Date 		utilDate 				= new Date();	// help variable to get current system date & time
+	
+	Measurement measurement 			= new Measurement(); 	// measurement for multiple entries (per site the measurement object is reused)
+	MeasurementsList measurementsList 	= new MeasurementsList(); // measurementlist for object of type Measurement
 	
     public static void main (String args[])
 	throws Exception
@@ -46,7 +52,7 @@ public class Trafficspeed extends DefaultHandler
     // When the start of the XML document is reached, initialize the output
     public void startDocument ()
     {
-	System.out.println("Start document");
+    	System.out.println("Start parsing document at " + utilDate.getTime());
     }
     
     // Parsing of tags
@@ -148,6 +154,7 @@ public class Trafficspeed extends DefaultHandler
 	    }
 	   
     	if(this.elementName == "publicationTime"){
+    		publicationTime = elementContent;
     		measurement.setPublicationTime(elementContent);
     	}
 
@@ -176,11 +183,13 @@ public class Trafficspeed extends DefaultHandler
    	// When we reach the end of the measurement, push the measurement to the database
    	if(name == "basicData"){
    		DataBaseHelper myDBH = new DataBaseHelper();
-   		myDBH.loadDatabase(measurement);
+   		myDBH.uploadMeasurement(measurement); // push individual measurement to database
+   		// measurementsList.addMeasurementToList(measurement, false); // use list functionality for creating multiple entries 
    	}
    	// When we reach the end of the siteMeasurements, post a result
    	if(name == "siteMeasurements"){
    		measurement.reset(); // reset the measurement
+   		measurement.setPublicationTime(publicationTime);
    	}
    }
 
@@ -188,7 +197,8 @@ public class Trafficspeed extends DefaultHandler
    // When the end of the XML document is reached, wrap up the output
    public void endDocument ()
    {
-	System.out.println("End document; " + parserCounter + " elements parsed");
+	   measurementsList.addMeasurementToList(measurement, true);
+	   System.out.println("End document; " + parserCounter + " elements parsed and finished at " + utilDate.getTime());
    }
 
    // Helper function to determine whether there is content in a value

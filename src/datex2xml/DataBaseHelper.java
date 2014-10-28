@@ -1,6 +1,8 @@
 package datex2xml;
 
 import java.sql.*;
+import java.util.List;
+
 import com.mysql.jdbc.Driver;
 
 /**
@@ -15,13 +17,14 @@ import com.mysql.jdbc.Driver;
 
 public class DataBaseHelper {
 	private String connector 	= "jdbc:mysql://";
-	private String host			;
+	private String host			= "localhost";
 	private String port 		= "3306";
-	private String database		;
-	private String table		;
-	private String user 		;
-	private String password 	;
+	private String database		= "verkeer";
+	private String table		= "MeasurementSiteTable";
+	private String user 		= "verkeer";
+	private String password 	= "verkeer";
 	private boolean test		= true;
+
 	
 	public void setTest(boolean testValue){
 		this.test = testValue;
@@ -31,21 +34,42 @@ public class DataBaseHelper {
 		this.table = table;
 	}
 	
-	public void loadDatabase(Measurement measurement){
+	public DBase newDataBase(){
 		DBase dataBase = new DBase();
-		Connection connection = dataBase.connect(	this.connector + 
-													this.host + ":"	+ 
-													this.port + "/" + 
-													this.database, 
-													user, 
-													password
-													);
+		return dataBase;
+		}
+	
+	public void uploadMeasurement(Measurement measurement){
+		DBase dataBase = newDataBase();
+		// connect to the database
+		Connection connection = dataBase.connect(
+				this.connector + 
+				this.host + ":"	+ 
+				this.port + "/" + 
+				this.database, 
+				user, 
+				password
+				);
 		// Load the content (test is used for output query)
 		dataBase.importMeasurement(	connection, 
 									this.table, 
 									measurement, 
 									test
 									);
+	}
+	
+	public void uploadMeasurementsList(List<Measurement> measurementsList){
+		DBase dataBase = newDataBase();
+		// connect to the database
+		Connection connection = dataBase.connect(
+				this.connector + 
+				this.host + ":"	+ 
+				this.port + "/" + 
+				this.database, 
+				user, 
+				password
+				);
+		dataBase.uploadMeasurementsList(connection, table, measurementsList, test);
 	}
 	
 }
@@ -62,11 +86,11 @@ class DBase
 			        Connection conn;
 			        try 
 			        {
-			            Class.forName(  
-			    "com.mysql.jdbc.Driver").newInstance();
-
-			            conn = DriverManager.getConnection(db_connect_str, 
-			    db_userid, db_password);
+			            Class.forName("com.mysql.jdbc.Driver").newInstance();
+			            conn = DriverManager.getConnection(
+			            		db_connect_str, 
+			            		db_userid, 
+			            		db_password);
 			        
 			        }
 			        catch(Exception e)
@@ -155,7 +179,7 @@ class DBase
                 
                 // check for test, if true, output the query
                 if(true == test){
-                	System.out.print(query);
+                	System.out.println(query);
                 } else { // else, go ahead with loading the query
                 stmt.executeUpdate(query);
                 }
@@ -167,4 +191,71 @@ class DBase
                 stmt = null;
             }
     }
+    
+    // Read the measurement list, process the entries and upload them
+ 	public void uploadMeasurementsList(Connection conn, String table, List<Measurement> measurementsList, boolean test){
+ 		Statement stmt;
+ 		String query;
+ 		// static header with an insert statement, the table structure and the values declaration
+ 		try
+        {
+            stmt = conn.createStatement(
+            			ResultSet.TYPE_SCROLL_INSENSITIVE,
+            			ResultSet.CONCUR_UPDATABLE);
+
+            query = "INSERT INTO `"+ table + "` ("
+            		+ "`record_ID` , "
+            		+ "`publicationTime`, "
+            		+ "`measurementSiteReference` , "
+            		+ "`measurementTimeDefault` , "
+            		+ "`_SiteMeasurementsIndexMeasuredValue` , "
+            		+ "`basicData` , "
+            		+ "`vehicleFlowRate` , "
+            		+ "`numberOfIncompleteInputs` , "
+            		+ "`numberOfInputValuesUsed` , "
+            		+ "`speed` , "
+            		+ "`standardDeviation`"
+            		+ ") "
+            		+ "VALUES ";
+
+            // dynamic body part for each measurement in the list...
+	 		for(int measurementEntry = 0; measurementEntry < measurementsList.size(); measurementEntry++){
+	 		query = query + "(NULL,'"
+					+ measurementsList.get(measurementEntry).getPublicationTime() + "','" 
+					+ measurementsList.get(measurementEntry).getMeasurementSiteReference() + "','"
+					+ measurementsList.get(measurementEntry).getMeasurementTimeDefault() + "','"
+					+ measurementsList.get(measurementEntry).getSiteMeasurementsIndexMeasuredValue() + "','"
+					+ measurementsList.get(measurementEntry).getBasicData() + "','"
+					+ measurementsList.get(measurementEntry).getVehicleFlowRate() + "','"
+					+ measurementsList.get(measurementEntry).getNumberOfIncompleteInputs() + "','"
+					+ measurementsList.get(measurementEntry).getNumberOfInputValuesUsed() + "','"
+					+ measurementsList.get(measurementEntry).getSpeed() + "','"
+					+ measurementsList.get(measurementEntry).getStandardDeviation() + "'"
+					+ ")";
+	 			
+	 			// ...validate that the last entry is given; then apply semicolon instead of comma
+	 			if(measurementEntry < measurementsList.size()){
+	 				query = query + ", \n";
+	 			} else {
+	 				query = query + ";";
+	 			}
+	 		}
+
+ 		// upload the query 
+	 		// check for test, if true, output the query
+            if(true == test){
+            	System.out.print(query);
+            } else { // else, go ahead with loading the query
+            stmt.executeUpdate(query);
+            }
+
+ 		// reset the query variable
+ 		query = "";	
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            stmt = null;
+        }
+ 	}
 }
