@@ -17,12 +17,12 @@ import com.mysql.jdbc.Driver;
 
 public class DataBaseHelper {
 	private String connector 	= "jdbc:mysql://";
-	private String host			= "localhost";
+	private String host			;
 	private String port 		= "3306";
-	private String database		= "verkeer";
-	private String table		= "MeasurementSiteTable";
-	private String user 		= "verkeer";
-	private String password 	= "verkeer";
+	private String database		;
+	private String table		;
+	private String user 		;
+	private String password 	;
 	private boolean test		= true;
 
 	
