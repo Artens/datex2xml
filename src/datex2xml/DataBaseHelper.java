@@ -158,7 +158,7 @@ class DBase
                 		+ "`numberOfInputValuesUsed` , "
                 		+ "`speed` , "
                 		+ "`standardDeviation`"
-                		+ ") ";
+                		+ ") \n ";
                            
                 // for each measurement, create an entry
             	query = query 	+ "VALUES " 
@@ -216,7 +216,7 @@ class DBase
             		+ "`speed` , "
             		+ "`standardDeviation`"
             		+ ") "
-            		+ "VALUES ";
+            		+ "VALUES \n";
 
             // dynamic body part for each measurement in the list...
 	 		for(int measurementEntry = 0; measurementEntry < measurementsList.size(); measurementEntry++){
@@ -234,10 +234,10 @@ class DBase
 					+ ")";
 	 			
 	 			// ...validate that the last entry is given; then apply semicolon instead of comma
-	 			if(measurementEntry < measurementsList.size()){
+	 			if(measurementEntry < (measurementsList.size() - 1)){
 	 				query = query + ", \n";
 	 			} else {
-	 				query = query + ";";
+	 				query = query + ";\n";
 	 			}
 	 		}
 
