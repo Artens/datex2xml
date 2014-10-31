@@ -16,26 +16,26 @@ ftp://83.247.110.3/
 
 This java application focuses on:
 *  traffic speed data using the trafficspeed.gz files which are 
-** compressed around 2Mb
-** uncompressed >50Mb containing traffic speed and traffic flow data combined in one XML file 
-** one XML file contains >17k measurement points in the Dutch roads
+  * compressed around 2Mb
+  * uncompressed >50Mb containing traffic speed and traffic flow data combined in one XML file 
+  * one XML file contains >17k measurement points in the Dutch roads
 *  reading measurements from the large XML files using SAX (DOM failed due to filesize)
 *  creating java objects with each measurement to be pushed to a MySQL database
 
 To Do:
-Implement direct download from FTP site to process file
-Read compressed  .gz file
-Create output file with SQL statements
-Add support for additional files
-* traveltime
-* wegwerkzaamheden (road maintenance)
-* brugopeningen (bridges)
-* additional specifications for trafficspeed (external party data reliability implementation)
+- [ ]	Implement direct download from FTP site to process file
+- [ ]	Read compressed  .gz file
+- [ ]	Create output file with SQL statements
+- [ ]	Add support for additional files
+  - [ ] traveltime
+  - [ ] wegwerkzaamheden (road maintenance)
+  - [ ] brugopeningen (bridges)
+  - [ ] additional specifications for trafficspeed (external party data reliability implementation)
 
 Done:
-* Read XML file for trafficspeed xml file
-* Create SQL statements in output text
-* Direct upload to MySQL database (requires mysql-connector-java-5.0.8-bin.jar)
+- [x] Read XML file for trafficspeed xml file
+- [x] Create SQL statements in output text
+- [x] Direct upload to MySQL database (requires mysql-connector-java-5.0.8-bin.jar)
 
 Changelog:
 
