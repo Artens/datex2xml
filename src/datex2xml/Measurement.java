@@ -1,5 +1,11 @@
 package datex2xml;
 
+/**
+ * @author J.K.J. Martens
+ *	The purpose of this file is to have an object type for Measurements available for processing. 
+ *	
+ */
+
 public class Measurement {
 	// all attributes of a single measurementSite
 	String	publicationTime;
@@ -96,24 +102,6 @@ public class Measurement {
 	}
 	public void setSpeed(float speed) {
 		this.speed = speed;
-	}
-	
-	public void reset(){
-	// RESET all values for the measurement
-		this.publicationTime = "";
-		this.measurementSiteReference = "";
-		this.measurementTimeDefault = "";
-		this.siteMeasurementsIndexMeasuredValue = 0;
-		this.measuredValue = "";
-		this.basicData = "";
-		this.trafficFlow = "";
-		this.vehicleFlowRate = 0;
-		this.trafficSpeed = "";
-		this.numberOfIncompleteInputs = 0;
-		this.numberOfInputValuesUsed = 0;
-		this.standardDeviation = 0;
-		this.speed = 0;
-		// System.out.println("measurement was reset"); // printout for resetting measurement data
 	}
 // end of Measurement
 }

@@ -1,33 +1,34 @@
 package datex2xml;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.zip.GZIPInputStream;
 
 import org.xml.sax.SAXException;
 
-import datex2xml.Trafficspeed;
 
+/**
+ * @author J.K.J. Martens
+ * 	Welcome to the Datex2XML package. 
+ *	Further information is found in the README.md file in the root of the package.
+ *
+ *	The purpose of this file is to handle the startup of the process of parsing a DATEX2 file.
+ *	
+ *	httpSite is used as a backup to have a known, static file available for testing purposes
+ *	
+ */
 public class Main {
 	 public static void main(String[] args) throws SAXException, IOException
 	    {
-	        boolean ftpTest = 	false;
-	        String fileType = 	"trafficspeed.gz";
-	        String ftpSite	=	"83.247.110.3";
-	        String httpSite	=	"http://artens.nl/jef/";
+	        boolean ftpDownload	= 	false;
+	        String 	fileType	= 	"trafficspeed.gz";
+	        // String ftpSite	=	"83.247.110.3";
+	        // String httpSite	=	"http://artens.nl/jef/";
 	        final String localFileName = "D:/trafficspeedFull";
 	        
 	        // setup for reading FTP files directly
-	        if(ftpTest && "trafficspeed.gz" == fileType){
+	        if(ftpDownload && "trafficspeed.gz" == fileType){
 		 		// load the file from the FTP directly        
-	        	final String fileFTP = "ftp://"+ ftpSite + "/" + fileType;
-	        	InputStream input = new GZIPInputStream(new FileInputStream(fileFTP));
+	        	// final String fileFTP = "ftp://"+ ftpSite + "/" + fileType;
+	        	// InputStream input = new GZIPInputStream(new FileInputStream(fileFTP));
 	        	// TODO write the file to temp location
 	        	
 	        	// Store location for parsing

@@ -12,6 +12,27 @@ import org.xml.sax.InputSource;
 import org.xml.sax.helpers.XMLReaderFactory;
 import org.xml.sax.helpers.DefaultHandler;
 
+/**
+ * @author J.K.J. Martens
+ *	The purpose of this file is threefold:
+ *	- having a XML parser (SAX is applied for versatility)
+ *	- process content to set content to a measurement
+ *	- push a measurement to a measurement list for processing
+ *
+ *	The XML content has been a slight challenge to decompose; there are three possible options:
+ *	The name of an XML tag: <somename></somename>
+ *	The attribute(s) of an XML tag: <somename attribute="special"></somename>
+ *	The element or content between the tag elements <somename>Content</somename>
+ *	
+ *	We use a parseHelper boolean to identify whether a tag name should be processed or not to speed up the processing.
+ *	
+ *	For measurements in the trafficspeed file, major information can be located in the attributes.
+ *	Therefore we check the list of attributes whether the required attribute is available and parse the content.
+ *	
+ *	In other situations, the elementContent is fetched from the element using the parseHelper setting.
+ *	
+ **/
+
 public class Trafficspeed extends DefaultHandler
 {
 
@@ -21,30 +42,25 @@ public class Trafficspeed extends DefaultHandler
 	String 		elementContent;							// help variable to set the Content between Element tags <el>Content</el>
 	int 		parserCounter 			= 0;			// help variable to count the number of elements parsed
 	Date 		date = new Date();
+	static String		sourceFile;
 	
 	/** temporary variables for measurements **/ 
 	String		publicationTime;						// temp variable to set publication Time
-	String		measurementSiteReference;				//
-	String		measurementTimeDefault;					//
-	int			siteMeasurementsIndexMeasuredValue;		//
-	String		measuredValue;							//
-	String		basicData;								//
-	int			vehicleFlowRate;						//
-	Float		speed = null;							//
-	int			numberOfIncompleteInputs;				//
-	int			numberOfInputValuesUsed;				//
-	Float		standardDeviation = null;				//
+	String		measurementSiteReference;				// temp variable to set the Site Reference ID
+	String		measurementTimeDefault;					// temp variable to set the Time of the Measurement
+	int			siteMeasurementsIndexMeasuredValue;		// temp variable to set the Measurement Index Number
+	String		measuredValue;							// temp variable to set the measuredValue type
+	String		basicData;								// temp variable to set the measurement type
+	int			vehicleFlowRate;						// temp variable to set the vehicle flow rate
+	Float		speed = null;							// temp variable to set the average speed of vehicles
+	int			numberOfIncompleteInputs;				// temp variable to set the number of incomplete inputs
+	int			numberOfInputValuesUsed;				// temp variable to set the number of input values used
+	Float		standardDeviation = null;				// temp variable to set the standard deviation of the measurement
 	
 	MeasurementsList measurementsList 	= new MeasurementsList(); // measurementlist for object of type Measurement
-	
-    public static void main (String args[])
-	throws Exception
-    {
-
-    }
-
 
     public static void readXML(String fileName) throws SAXException, IOException    {
+    	sourceFile = fileName;
     	XMLReader xr = XMLReaderFactory.createXMLReader();
     	Trafficspeed handler = new Trafficspeed();
     	xr.setContentHandler(handler);
@@ -60,7 +76,7 @@ public class Trafficspeed extends DefaultHandler
     
         
     ////////////////////////////////////////////////////////////////////
-    // Event handlers.
+    // Event handlers for the SAX implementation
     ////////////////////////////////////////////////////////////////////
 
     // When the start of the XML document is reached, initialize the output
@@ -72,9 +88,8 @@ public class Trafficspeed extends DefaultHandler
     						);
     }
     
-    // Parsing of tags
-    public void startElement (String uri, String name,
-			      String qName, Attributes atts)
+    // Parsing of XML tags
+    public void startElement (String uri, String name, String qName, Attributes atts)
     {
     	if(name == "publicationTime"){
     		this.elementName = name;
@@ -83,7 +98,6 @@ public class Trafficspeed extends DefaultHandler
     	
     	if(name == "measurementSiteReference")	{
     		measurementSiteReference = processStringElement(name, atts, true, "id");
-    		// measurement.setMeasurementSiteReference(processStringElement(name, atts, true, "id"));
 	    } 
     	
     	if(name == "measurementTimeDefault")	{
@@ -94,44 +108,35 @@ public class Trafficspeed extends DefaultHandler
     	if(name == "measuredValue"){
     		if (getValue("index", atts)){
     	    	siteMeasurementsIndexMeasuredValue = Integer.parseInt(atts.getValue("index"));
-    			// measurement.setSiteMeasurementsIndexMeasuredValue(Integer.parseInt(atts.getValue("index")));
     	    	measuredValue = "MeasuredValue";
-    	    	// measurement.setMeasuredValue("MeasuredValue");
     		}
 	    }
     	
     	if(name == "basicData"){
     		basicData = processStringElement(name, atts, true, "xsi:type");
-    		// measurement.setBasicData(processStringElement(name, atts, true, "xsi:type"));
 		}
     	
     	if(name == "vehicleFlow"){
     		if(getValue("numberOfIncompleteInputs", atts)){
 	    		numberOfIncompleteInputs = processIntElement(name, atts, true, "numberOfIncompleteInputs");
-	    		// measurement.setNumberOfIncompleteInputs(processIntElement(name, atts, true, "numberOfIncompleteInputs"));
 			}
 			if(getValue("numberOfInputValuesUsed", atts)){
 				numberOfInputValuesUsed = processIntElement(name, atts, true, "numberOfInputValuesUsed");
-				// measurement.setNumberOfInputValuesUsed(processIntElement(name, atts, true, "numberOfInputValuesUsed"));
 			}
 			if(getValue("standardDeviation", atts)){
 				standardDeviation = Float.parseFloat(processStringElement(name, atts, true, "standardDeviation"));
-				// measurement.setStandardDeviation(processIntElement(name, atts, true, "standardDeviation"));
 			}
 	    }
     	
     	if(name == "averageVehicleSpeed"){
 			if(getValue("numberOfIncompleteInputs", atts)){
 				numberOfIncompleteInputs = processIntElement(name, atts, true, "numberOfIncompleteInputs");
-				// measurement.setNumberOfIncompleteInputs(processIntElement(name, atts, true, "numberOfIncompleteInputs"));
 			}
 			if(getValue("numberOfInputValuesUsed", atts)){
 				numberOfInputValuesUsed = processIntElement(name, atts, true, "numberOfInputValuesUsed");
-				// measurement.setNumberOfInputValuesUsed(processIntElement(name, atts, true, "numberOfInputValuesUsed"));
 			}
 			if(getValue("standardDeviation", atts)){
 				standardDeviation = Float.parseFloat(processStringElement(name, atts, true, "standardDeviation"));
-				// measurement.setStandardDeviation(Float.parseFloat(processStringElement(name, atts, true, "standardDeviation")));
 			}
 	    }
     	
@@ -173,7 +178,6 @@ public class Trafficspeed extends DefaultHandler
 				System.out.print("");
 				break;
 			    default:
-				// System.out.print(ch[i]);
 				elementContent = elementContent + ch[i];
 				break;
 		    	}
@@ -186,17 +190,14 @@ public class Trafficspeed extends DefaultHandler
 
     	if(this.elementName == "measurementTimeDefault"){
     		measurementTimeDefault = elementContent;
-    		// measurement.setMeasurementTimeDefault(elementContent);
     	}
     	
     	if(this.elementName == "vehicleFlowRate"){
     		vehicleFlowRate = Integer.parseInt(elementContent);
-    		// measurement.setVehicleFlowRate(Integer.parseInt(elementContent));
 	    }
     	
     	if(this.elementName == "speed"){
     		speed = Float.parseFloat(elementContent);
-    		// measurement.setSpeed(Float.parseFloat(elementContent));
 	    }
    }
 
@@ -211,33 +212,33 @@ public class Trafficspeed extends DefaultHandler
    	
    	// When we reach the end of the measurement, push the measurement to the database
    	if(name == "basicData"){
-   		// Create a measurement
    		Measurement measurement = createNewMeasurement(); 
-   		// Fill the measurement
    		addMeasurementData(measurement);
-   		// Push the measurement
-   		measurementsList.addMeasurementToList(measurement, false); // use list functionality for creating multiple entries
-   		// DataBaseHelper myDBH = new DataBaseHelper();
-   		// myDBH.uploadMeasurement(measurement); // push individual measurement to database
-   		   		 
+   		measurementsList.addMeasurementToList(measurement, false);
+   	}
+   	
+   	if(name == "measuredValue"){
+   		resetMeasurementPartialContent(); // reset partial measurement values
    	}
    	// When we reach the end of the siteMeasurements, post a result
    	if(name == "siteMeasurements"){
-   		// measurement.reset(); // reset the measurement
-   		// measurement.setPublicationTime(publicationTime);
-   		resetMeasurementContent();
+   		resetMeasurementFullContent(); // reset values
    		}
    	}
 
 // When the end of the XML document is reached, wrap up the output
    public void endDocument ()
    {
-	   // measurementsList.addMeasurementToList(measurement, true);
 	   measurementsList.sendLastMeasurements();
 	   Date endDate = new Date();
-	   System.out.println("End document; " 
+	   System.out.println("End of document " 
+			   + sourceFile
+			   + "\n"
 			   + parserCounter 
-			   + " elements parsed and finished at " 
+			   + " elements parsed\n"
+			   + measurementsList.getMeasurementCount()
+			   + " measurements processed\n"
+			   + "finished at " 
 			   + new Timestamp(endDate.getTime())
 			   );
    }
@@ -259,17 +260,20 @@ public class Trafficspeed extends DefaultHandler
 	   measurement.setMeasuredValue(measuredValue);
 	   measurement.setBasicData(basicData);
 	   measurement.setVehicleFlowRate(vehicleFlowRate);
-	   if(speed != null){measurement.setSpeed(speed);}
+	   // float values are somewhat tacky, so we do not fill them if not required
+	   if(speed != null){
+		   measurement.setSpeed(speed);
+		   }
 	   measurement.setNumberOfIncompleteInputs(numberOfIncompleteInputs);
 	   measurement.setNumberOfInputValuesUsed(numberOfInputValuesUsed);
-	   if (standardDeviation != null){measurement.setStandardDeviation(standardDeviation);}
+	   if (standardDeviation != null){
+		   measurement.setStandardDeviation(standardDeviation);
+		   }
 	   
 	   return measurement;
    }
    
-   private void resetMeasurementContent(){
-		measurementSiteReference 			= "";	//
-		measurementTimeDefault 				= "";	//
+   private void resetMeasurementPartialContent(){
 		siteMeasurementsIndexMeasuredValue 	= 0;	//
 		measuredValue 						= "";	//
 		basicData							= "";	//
@@ -278,6 +282,12 @@ public class Trafficspeed extends DefaultHandler
 		numberOfIncompleteInputs			= 0;	//
 		numberOfInputValuesUsed				= 0;	//
 		standardDeviation					= null;	//
+   }
+   
+   private void resetMeasurementFullContent(){
+		measurementSiteReference 			= "";	//
+		measurementTimeDefault 				= "";	//
+		resetMeasurementPartialContent();
    }
    
    public void printElement(String name, Attributes atts, boolean check, String value){

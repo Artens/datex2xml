@@ -7,13 +7,14 @@ import com.mysql.jdbc.Driver;
 
 /**
  * @author J.K.J. Martens
- * 
+ *  The purpose of the DataBaseHelper file is to connect to a MySQL database
+ *  
  *	In this file some specific information is redacted, 
  *	as one wouldn't want to publicize ones database credentials...
  *	
  *	The test variable in this class allows you to test your queries
  *	by outputting the full query to the console
- */
+ **/
 
 public class DataBaseHelper {
 	private String connector 	= "jdbc:mysql://";
@@ -101,64 +102,20 @@ class DBase
 
 			        return conn;    
 			    }    
-    
-    public void importData(Connection conn, String table, String[][] arrayList){
-        Statement stmt;
-        String query;
-
-        try
-        {
-            stmt = conn.createStatement(
-            			ResultSet.TYPE_SCROLL_SENSITIVE,
-            			ResultSet.CONCUR_UPDATABLE);
-
-            query = "INSERT INTO TABLE testtable (id, text, price)" + 
-            		"VALUES ";
-            // For each entry in the arrayList, create an entry
-            for(int i = 0; i < arrayList.length; i++){
-            	if(0 != i){
-            		// Add a comma to separate entries
-            		query = query + ",";
-            	}
-            	// for each entry in the arrayList, create an entry
-            	query = query + "('" + arrayList[i][1] + "','" + arrayList[i][2] + "')";
-            }
             
-            query = query + ";"; // mark the end of the insertion
-
-            stmt.executeUpdate(query);
-                
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-            stmt = null;
-        }
-    }
-    
     public void importMeasurement(Connection conn, String table, Measurement measurement, boolean test){
             Statement stmt;
-            String query;
+            String query = null;
 
             try
             {
                 stmt = conn.createStatement(
                 			ResultSet.TYPE_SCROLL_INSENSITIVE,
                 			ResultSet.CONCUR_UPDATABLE);
-
-                query = "INSERT INTO `"+ table + "` ("
-                		+ "`record_ID` , "
-                		+ "`publicationTime`, "
-                		+ "`measurementSiteReference` , "
-                		+ "`measurementTimeDefault` , "
-                		+ "`_SiteMeasurementsIndexMeasuredValue` , "
-                		+ "`basicData` , "
-                		+ "`vehicleFlowRate` , "
-                		+ "`numberOfIncompleteInputs` , "
-                		+ "`numberOfInputValuesUsed` , "
-                		+ "`speed` , "
-                		+ "`standardDeviation`"
-                		+ ") \n ";
+                
+                // Create the query header
+                query = createTableQuery(query, table);
+                
                            
                 // for each measurement, create an entry
             	query = query 	+ "VALUES " 
@@ -192,7 +149,24 @@ class DBase
             }
     }
     
-    // Read the measurement list, process the entries and upload them
+    private String createTableQuery(String query, String table) {
+    	query = "INSERT INTO `"+ table + "` ("
+        		+ "`record_ID` , "
+        		+ "`publicationTime`, "
+        		+ "`measurementSiteReference` , "
+        		+ "`measurementTimeDefault` , "
+        		+ "`_SiteMeasurementsIndexMeasuredValue` , "
+        		+ "`basicData` , "
+        		+ "`vehicleFlowRate` , "
+        		+ "`numberOfIncompleteInputs` , "
+        		+ "`numberOfInputValuesUsed` , "
+        		+ "`speed` , "
+        		+ "`standardDeviation`"
+        		+ ") \n ";
+		return query;
+	}
+
+	// Read the measurement list, process the entries and upload them
  	public void uploadMeasurementsList(Connection conn, String table, List<Measurement> measurementsList, boolean test){
  		Statement stmt;
  		String query;
@@ -234,7 +208,7 @@ class DBase
 					+ ")";
 	 			
 	 			// ...validate that the last entry is given; then apply semicolon instead of comma
-	 			if(measurementEntry < (measurementsList.size() - 1)){
+	 			if(measurementEntry < (measurementsList.size()-1)){
 	 				query = query + ", \n";
 	 			} else {
 	 				query = query + ";\n";
