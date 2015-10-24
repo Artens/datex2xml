@@ -20,17 +20,15 @@ public class Main {
 	    {
 	        boolean ftpDownload	= 	false;
 	        String 	fileType	= 	"trafficspeed.gz";
-	        // String ftpSite	=	"83.247.110.3";
+	        // String ftpSite	=	"ftp://83.247.110.3/";
 	        // String httpSite	=	"http://artens.nl/jef/";
 	        final String localFileName = "D:/trafficspeedFull";
 	        
 	        // setup for reading FTP files directly
 	        if(ftpDownload && "trafficspeed.gz" == fileType){
-		 		// load the file from the FTP directly        
-	        	// final String fileFTP = "ftp://"+ ftpSite + "/" + fileType;
-	        	// InputStream input = new GZIPInputStream(new FileInputStream(fileFTP));
-	        	// TODO write the file to temp location
-	        	
+		 		// load the file from the FTP directly
+		 		loadFile(ftpSite, fileName);
+					        		        	
 	        	// Store location for parsing
 	        	String inputFile = "";
 	        	// parse the file
@@ -46,5 +44,20 @@ public class Main {
 	        		Trafficspeed.readXML(args[0]);
 	        	} // end if args.length
 	    	} // end if ftpTest && fileType
+      
+   private static File loadFile (String ftpSite, String fileName) throws IOException
+   		{
+      		savedFile = "";
+     			try{ 
+              		InputStream fileStream = new FileInputStream(ftpSite+fileName);
+						InputStream gzipStream = new GZIPInputStream(fileStream);
+						Reader decoder = new InputStreamReader(gzipStream, encoding);
+						BufferedReader buffered = new BufferedReader(decoder);       
+            	} 
+     			finally {
+              // TODO catch whatever issue on ftp site loading
+            	}
+     			return savedFile;
+   		}
 	    } // end Main
 } // END OF FILE
