@@ -11,8 +11,8 @@ This implementation is focused on the raw data shared in the open data resource 
 For more information on the NDW and their services please visit:
 http://www.ndw.nu/
 
-The NDW FTP address with data in 60 second interval is:
-ftp://83.247.110.3/
+The NDW  address with data in 60 second interval is:
+http://opendata.ndw.nu/
 
 This java application focuses on:
 *  traffic speed data using the trafficspeed.gz files which are 
